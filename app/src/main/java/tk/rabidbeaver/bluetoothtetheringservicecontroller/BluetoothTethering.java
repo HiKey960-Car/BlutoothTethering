@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -52,6 +53,7 @@ public class BluetoothTethering extends AppCompatActivity {
         boolean autoconnect = prefs.getBoolean("autoconnect", false);
         boolean autotether = prefs.getBoolean("autotether", false);
         boolean autooffwifi = prefs.getBoolean("autooffwifi", false);
+        boolean autohotspot = prefs.getBoolean("autohotspot", false);
 
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -96,6 +98,27 @@ public class BluetoothTethering extends AppCompatActivity {
                 SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
                 editor.putBoolean("autooffwifi", isChecked);
                 editor.apply();
+            }
+        });
+
+        Switch hotspotswitch = (Switch) findViewById(R.id.onhotspot);
+        hotspotswitch.setChecked(autohotspot);
+        hotspotswitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
+                editor.putBoolean("autohotspot", isChecked);
+                editor.apply();
+                if (isChecked){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (!Settings.System.canWrite(getApplicationContext())) {
+                            Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                            intent.setData(Uri.parse("package:" + getPackageName()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    }
+                }
             }
         });
 
@@ -187,7 +210,7 @@ public class BluetoothTethering extends AppCompatActivity {
     }
 
     private void enableTethering() {
-        if (!Settings.System.canWrite(this)){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)){
             Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
             intent.setData(Uri.parse("package:" + getPackageName()));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

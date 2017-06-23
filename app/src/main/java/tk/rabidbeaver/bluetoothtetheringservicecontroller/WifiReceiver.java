@@ -13,9 +13,13 @@ public class WifiReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences prefs = context.getSharedPreferences("Settings", Context.MODE_PRIVATE);
         boolean autooffwifi = prefs.getBoolean("autooffwifi", false);
+        boolean autohotspot = prefs.getBoolean("autohotspot", false);
         int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 
         if (autooffwifi && wifiState == WifiManager.WIFI_STATE_ENABLED){
+            try {
+                Thread.sleep(5000);
+            } catch (Exception e){e.printStackTrace();}
             Log.d("WifiReceiver","Trying to deactivate wifi.");
             WifiManager wman = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
             int counter = 0;
@@ -30,5 +34,6 @@ public class WifiReceiver extends BroadcastReceiver {
                 if (!wman.isWifiEnabled()) break;
             }
         }
+        if (autohotspot && !ApManager.isApOn(context)) ApManager.configApState(context);
     }
 }
