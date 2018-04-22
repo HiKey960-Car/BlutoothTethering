@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".BluetoothTethering" >
+    tools:context=".TetheringConfigActivity" >
 
     <ImageView
         android:id="@+id/imageView1"
@@ -95,11 +95,23 @@
         android:id="@+id/srvsw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/srvwifisw"
         android:layout_marginBottom="10dp"
         android:layout_centerInParent="true"
         android:checked="false"
         android:text="Auto Bluetooth Tethering"
+        android:textColor="@android:color/black"
+        android:textOff="OFF"
+        android:textOn="ON" />
+    <Switch
+        android:id="@+id/srvwifisw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:layout_centerInParent="true"
+        android:checked="false"
+        android:text="Auto Wifi Tethering"
         android:textColor="@android:color/black"
         android:textOff="OFF"
         android:textOn="ON" />

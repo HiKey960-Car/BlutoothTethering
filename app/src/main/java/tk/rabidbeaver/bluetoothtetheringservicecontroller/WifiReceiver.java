@@ -34,6 +34,6 @@ public class WifiReceiver extends BroadcastReceiver {
                 if (!wman.isWifiEnabled()) break;
             }
         }
-        if (autohotspot && !ApManager.isApOn(context)) ApManager.configApState(context);
+        if (autohotspot && !ApManager.isApOn(context)) ApManager.startTethering(context);
     }
 }

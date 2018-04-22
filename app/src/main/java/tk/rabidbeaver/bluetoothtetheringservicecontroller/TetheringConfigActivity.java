@@ -1,6 +1,5 @@
 package tk.rabidbeaver.bluetoothtetheringservicecontroller;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -8,13 +7,10 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -28,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BluetoothTethering extends AppCompatActivity {
+public class TetheringConfigActivity extends AppCompatActivity {
     Class<?> classBluetoothPan = null;
     Constructor<?> BTPanCtor = null;
     Object BTSrvInstance = null;
@@ -54,6 +50,7 @@ public class BluetoothTethering extends AppCompatActivity {
         boolean autotether = prefs.getBoolean("autotether", false);
         boolean autooffwifi = prefs.getBoolean("autooffwifi", false);
         boolean autohotspot = prefs.getBoolean("autohotspot", false);
+        boolean autowifitether = prefs.getBoolean("autowifitether", false);
 
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -62,7 +59,7 @@ public class BluetoothTethering extends AppCompatActivity {
 
         int i = 0;
         for (BluetoothDevice device : pairedDevices) {
-            Log.d("BluetoothTethering",device.getName()+", "+device.getAddress());
+            Log.d("TetheringConfigActivity",device.getName()+", "+device.getAddress());
             if (selectedDevices.size() > 0 && setContainsString(selectedDevices, device.getAddress())) selected[i] = true;
             pda[i] = new PairedDev(device);
             i++;
@@ -133,6 +130,17 @@ public class BluetoothTethering extends AppCompatActivity {
             }
         });
 
+        nswitch = (Switch) findViewById(R.id.srvwifisw);
+        nswitch.setChecked(autowifitether);
+        nswitch.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener(){
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = getSharedPreferences("Settings", MODE_PRIVATE).edit();
+                editor.putBoolean("autowifitether", isChecked);
+                editor.apply();
+            }
+        });
+
         findViewById(R.id.srvbtn).setOnClickListener(new Switch.OnClickListener(){
             public void onClick(View v){
                 try {
@@ -164,7 +172,7 @@ public class BluetoothTethering extends AppCompatActivity {
                 class BTPanClientListener implements BluetoothProfile.ServiceListener {
                     @Override
                     public void onServiceConnected(final int profile, final BluetoothProfile proxy) {
-                        Log.e("BluetoothTethering", "BTPan proxy connected");
+                        Log.e("TetheringConfigActivity", "BTPan proxy connected");
                         PairedDev selectedItem = null;
                         for (int i=0; i<spinnerArrayAdapter.getCount(); i++){
                             if (spinner.getSelected()[i]) selectedItem = (PairedDev) spinnerArrayAdapter.getItem(i);
@@ -174,10 +182,10 @@ public class BluetoothTethering extends AppCompatActivity {
                         try {
                             Method connectMethod = proxy.getClass().getDeclaredMethod("connect", BluetoothDevice.class);
                             if(!((Boolean) connectMethod.invoke(proxy, device))){
-                                Log.e("BluetoothTethering", "Unable to start connection");
+                                Log.e("TetheringConfigActivity", "Unable to start connection");
                             }
                         } catch (Exception e) {
-                            Log.e("BluetoothTethering", "Unable to reflect android.bluetooth.BluetoothPan", e);
+                            Log.e("TetheringConfigActivity", "Unable to reflect android.bluetooth.BluetoothPan", e);
                         }
                     }
 
@@ -192,7 +200,7 @@ public class BluetoothTethering extends AppCompatActivity {
                     ctor.setAccessible(true);
                     ctor.newInstance(getApplicationContext(), new BTPanClientListener());
                 } catch (Exception e) {
-                    Log.e("BluetoothTethering", "Unable to reflect android.bluetooth.BluetoothPan", e);
+                    Log.e("TetheringConfigActivity", "Unable to reflect android.bluetooth.BluetoothPan", e);
                 }
             }
         });

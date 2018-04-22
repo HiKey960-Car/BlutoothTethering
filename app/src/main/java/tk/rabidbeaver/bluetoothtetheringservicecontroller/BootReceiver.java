@@ -20,6 +20,9 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences prefs = context.getSharedPreferences("Settings", MODE_PRIVATE);
         boolean autotether = prefs.getBoolean("autotether", false);
+        boolean autohotspot = prefs.getBoolean("autohotspot", false);
+
+        Log.d("BootReceiver", "autotether: "+Boolean.toString(autotether)+", autohotspot: "+Boolean.toString(autohotspot));
 
         if (autotether){
             Log.d("BootReceiver","Trying to activate tethering.");
@@ -36,5 +39,7 @@ public class BootReceiver extends BroadcastReceiver {
                 e.printStackTrace();
             }
         }
+
+        if (autohotspot && !ApManager.isApOn(context)) ApManager.startTethering(context);
     }
 }
